@@ -1,107 +1,108 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   secondver.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pcapesta <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2018/07/21 21:53:52 by pcapesta          #+#    #+#             */
+/*   Updated: 2018/07/22 00:00:50 by pcapesta         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 #include <stdio.h>
 
-
-char		*read_gnl(char **rest, int fd)
+int get_next_line(const int fd, char **line)
 {
+	static char		*rest = NULL;
+	char			buf[BUFF_SIZE + 1];
+	int				ret;
+	char			*gnl;
+	char			*interm;
+	int i;
 
-	char	*final;
-	char	buf[BUFF_SIZE + 1];
-	int		ret = 1;
+	gnl = NULL;
+	interm = NULL;
+	ret = 0;
+	i = 0;
 
-	if (*rest && ft_strchr(*rest, '\n') == NULL)
+	if (rest)
 	{
+		//printf("coucou!\n");
+		if (!(ft_strchr(rest, '\n')))
+		{
+			ret = read(fd, buf, BUFF_SIZE);
+			if (ret == 0)
+			{
+				*line = ft_strdup(rest);
+				return (1);
+			}
+			else if (ret == -1)
+				return (-1);
+			else if (ret != -1)
+			{
+				buf[ret] = '\0';
+				gnl = ft_strjoin(rest, buf);
+			}
+		}
+		else if (ft_strchr(rest, '\n'))
+			gnl = ft_strdup(rest);
+		ft_memdel((void**)&rest);
+	}
+	else if (!(rest))
+	{
+		//printf("coucou\n");
 		ret = read(fd, buf, BUFF_SIZE);
-		if (ret != -1)
+		if (ret == 0)
+			return (0);
+		else if (ret == -1)
+			return (-1);
+		else if (ret != -1)
 		{
 			buf[ret] = '\0';
-			final = ft_strjoin(*rest, buf);
-			ft_memdel((void*)rest);
+			gnl = ft_strdup(buf);
 		}
-		else
-			return (NULL);
 	}
-	else if (*rest && ft_strchr(*rest, '\n') != NULL)
+	while (!(ft_strchr(gnl, '\n')))
 	{
-		final = ft_strdup(*rest);
-		ft_memdel((void*)rest);
-	}
-	else
-	{
+		interm = ft_strdup(gnl);
 		ret = read(fd, buf, BUFF_SIZE);
-		if (ret != -1)
+		if (ret == 0)
+		{
+			*line = ft_strdup(interm);
+			return (1);
+		}
+		else if (ret == -1)
+			return (-1);
+		else if (ret != -1)
 		{
 			buf[ret] = '\0';
-			final = ft_strdup(buf);
+			gnl = ft_strjoin(interm, buf);
 		}
 	}
-	return (final);
+	while (gnl[i] && gnl[i] != '\n')
+		i++;
+	*line = strndup(gnl, i);
+	rest = ft_strsub(gnl, i + 1, ft_strlen(gnl) - (i + 1));
+	rest[0] = 0;
+	return (1);
 }
+\0 = 0 = NULL
+'0' = 48
 
-char		*cut_line(char **final, int fd, char **rest)
+int		main()
 {
-	char *inter;
-	inter = NULL;
-
-	char *detector;
-	detector = NULL;
-
-	int ret = 1;
-	char buf[BUFF_SIZE + 1];
-
+	int fd;
+	char *ou;
+	int		ret = 0;
 	int i = 0;
-	char *newline;
 
-	while (!(detector = ft_strchr(*final, '\n')))
+	fd = open("text.c", O_RDONLY);
+	while (i < 3)
 	{
-		inter = ft_strdup(*final);
-		ret = read(fd, buf, BUFF_SIZE);
-		if (ret != -1 && ret != 0)
-		{
-			buf[ret] = '\0';
-			*final = ft_strjoin(inter, buf);
-		}
-	}
-	while ((*final)[i] && (*final)[i] != '\n')
-	{
+		ret = get_next_line(fd, &ou);
 		i++;
 	}
-	newline = strndup(*final, i);
-	*rest = ft_strsub(*final, i + 1, ft_strlen(*final) - (i + 1));
-	return (newline);
-}
-
-int		get_next_line(const int fd, char **line)
-{
-	static char *rest = NULL;
-
-	char *stock;
-	stock = NULL;
-
-	stock = read_gnl(&rest, fd);
-	if (stock)
-	{
-		*line = cut_line(&stock, fd, &rest);
-		printf("%s\n", *line);
-		return (1);
-	}
-	else
-		return (0);
-}
-
-int main()
-{
-
-	//int fd;
-	char *ou;
-	int coucou;
-
-	//fd = open("text.c", O_RDONLY);
-	coucou = get_next_line(0, &ou);
-	printf("%d\n", coucou);
-	//get_next_line(fd, &ou);
-	//get_next_line(fd, &ou);
-	//get_next_line(fd, &ou);
-	//get_next_line(fd, &ou);
 }
 

@@ -6,10 +6,10 @@
 # include <fcntl.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include "../libft/libft.h"
+# include "./libft/libft.h"
 
-#define BUFF_SIZE 1
-void ft_putstr(char const *s);
+# define BUFF_SIZE 28
 
+int		get_next_line(const int fd, char **line);
 
 #endif
