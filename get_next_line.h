@@ -6,7 +6,7 @@
 /*   By: pcapesta <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/07/28 20:20:56 by pcapesta          #+#    #+#             */
-/*   Updated: 2018/07/28 20:20:59 by pcapesta         ###   ########.fr       */
+/*   Updated: 2018/07/29 23:44:18 by pcapesta         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,17 @@
 # include <unistd.h>
 # include "./libft/libft.h"
 
-# define BUFF_SIZE 10
+# define BUFF_SIZE 1
 
 int		get_next_line(const int fd, char **line);
+
+typedef struct			s_multifd
+{
+	char				*rest;
+	int					fd;
+	struct s_multifd	*next;
+}						t_multifd;
+
+
 
 #endif
