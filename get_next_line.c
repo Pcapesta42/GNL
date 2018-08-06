@@ -64,6 +64,7 @@ int get_next_line(const int fd, char **line)
 	int					ret;
 	int					i;
 
+
 	tmp = NULL;
 	ret = 1;
 	i = 0;
@@ -76,17 +77,20 @@ int get_next_line(const int fd, char **line)
 	}
 	else
 	{
-		if (!(tmp = malloc(sizeof(char) * 1)))
+		if (!(tmp = ft_memalloc(sizeof(char) * 1)))
 			return (-1);
 		tmp[0] = '\0';
 	}
-	while (!(ft_strchr(tmp, '\n')) && ret > 0)
+	while (!(ft_strchr(tmp, '\n')) && (ret = read(fd, buf, BUFF_SIZE) > 0))
 	{
-		ft_bzero(buf, BUFF_SIZE + 1);
-		ret = read(fd, buf, BUFF_SIZE);
+		printf("Read : %d\n", ret);
 		buf[ret] = '\0';
+		printf("Buf : %s\n", buf);
 		tmp = ft_strjoin(tmp, buf);
+		printf("Tmp : %s\n", tmp);
+		ft_bzero(buf, BUFF_SIZE + 1);
 	}
+	printf("%s\n", tmp);
 	if (ret == -1)
 		return (ret);
 	else if (ret == 0 && tmp == NULL)
@@ -118,7 +122,6 @@ int		main()
 	get_next_line(fd, &ou);
 	printf("%s\n", ou);
 	get_next_line(fd, &ou);
-	return (1);
 
 /*	while ((ret = get_next_line(fd, &ou)) > 0)
 	{
