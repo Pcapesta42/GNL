@@ -61,11 +61,13 @@ int get_next_line(const int fd, char **line)
 	char				buf[BUFF_SIZE + 1];
 	t_multifd			*link_list;
 	char				*tmp;
+	char				*anti_leak;
 	int					ret;
 	int					i;
 
 
 	tmp = NULL;
+	anti_leak = NULL;
 	ret = 1;
 	i = 0;
 	if (!(line) || fd < 0 || !(link_list = get_fd(&begin_list, fd)))
@@ -76,17 +78,26 @@ int get_next_line(const int fd, char **line)
 		ft_memdel((void**)&link_list->rest);
 	}
 	else if (!(tmp = ft_memalloc(sizeof(char) * 1)))
+	{
+		ft_memdel((void**)&tmp);
 		return (-1);
+	}
 	while (!(ft_strchr(tmp, '\n')) && (ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
 		buf[ret] = '\0';
+		anti_leak = tmp;
 		tmp = ft_strjoin(tmp, buf);
+		ft_memdel((void**)&anti_leak);
 		ft_bzero(buf, BUFF_SIZE + 1);
 	}
 	if (ret == -1)
-		return (ret);
-	else if (ret == 0 && tmp == NULL)
 	{
+		ft_memdel((void**)&tmp);
+		return (ret);
+	}
+	else if (ret == 0 && tmp[0] == '\0')
+	{
+		ft_memdel((void**)&tmp);
 		repare_list(&begin_list, link_list);
 		return (0);
 	}
@@ -109,21 +120,24 @@ int		main()
 {
 	int fd;
 	char *ou;
+	int ret = 1;
 	fd = open("text.c", O_RDONLY);
 
-	get_next_line(fd, &ou);
+/*	get_next_line(fd, &ou);
 	printf("%s\n", ou);
 	get_next_line(fd, &ou);
 	printf("%s\n", ou);
+	get_next_line(fd, &ou);
+	printf("%s\n", ou);
+*/
 
-/*	while ((ret = get_next_line(fd, &ou)) > 0)
+	while ((ret = get_next_line(fd, &ou)) > 0)
 	{
 		printf("%s\n", ou);
 		free(ou);
 	}
 
 	//while (1)
-	//;
-}
-*/
+//	;
+
 }
