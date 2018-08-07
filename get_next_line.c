@@ -63,7 +63,6 @@ int		read_gnl(t_multifd *link_list, char **tmp, int fd)
 
 	ret = 1;
 	anti_leak = NULL;
-
 	if (link_list->rest)
 	{
 		*tmp = ft_strdup(link_list->rest);
