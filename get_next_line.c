@@ -55,6 +55,7 @@ void		repare_list(t_multifd **begin_list, t_multifd *link_list)
 	free(link_list);
 }
 
+
 int get_next_line(const int fd, char **line)
 {
 	static t_multifd	*begin_list = NULL;
@@ -63,13 +64,11 @@ int get_next_line(const int fd, char **line)
 	char				*tmp;
 	char				*anti_leak;
 	int					ret;
-	int					i;
 
 
 	tmp = NULL;
 	anti_leak = NULL;
 	ret = 1;
-	i = 0;
 	if (!(line) || fd < 0 || !(link_list = get_fd(&begin_list, fd)))
 		return (-1);
 	if (link_list->rest)
@@ -90,46 +89,43 @@ int get_next_line(const int fd, char **line)
 		ft_memdel((void**)&anti_leak);
 		ft_bzero(buf, BUFF_SIZE + 1);
 	}
-	if (ret == -1)
+	if (ret == -1 || (ret == 0 && tmp[0] == '\0'))
 	{
 		ft_memdel((void**)&tmp);
+		if (ret == 0)
+			repare_list(&begin_list, link_list);
 		return (ret);
-	}
-	else if (ret == 0 && tmp[0] == '\0')
-	{
-		ft_memdel((void**)&tmp);
-		repare_list(&begin_list, link_list);
-		return (0);
 	}
 	else if (ret == 0 && !(ft_strchr(tmp, '\n')))
 		*line = ft_strdup(tmp);
 	else
 	{
-		while (tmp[i] && tmp[i] != '\n')
-			i++;
-		*line = strndup(tmp, i);
-		if (tmp[i] && tmp[i + 1])
-			link_list->rest = ft_strsub(tmp, i + 1, ft_strlen(tmp) - (i + 1));
+		ret = 0;
+		while (tmp[ret] && tmp[ret] != '\n')
+			ret++;
+		*line = strndup(tmp, ret);
+		if (tmp[ret] && tmp[ret + 1])
+			link_list->rest = ft_strsub(tmp, ret + 1, ft_strlen(tmp) - (ret + 1));
 	}
 	ft_memdel((void**)&tmp);
 	return (1);
 }
 
 
-int		main()
+/*int		main()
 {
 	int fd;
 	char *ou;
 	int ret = 1;
 	fd = open("text.c", O_RDONLY);
 
-/*	get_next_line(fd, &ou);
-	printf("%s\n", ou);
 	get_next_line(fd, &ou);
 	printf("%s\n", ou);
 	get_next_line(fd, &ou);
 	printf("%s\n", ou);
-*/
+	get_next_line(fd, &ou);
+	printf("%s\n", ou);
+
 
 	while ((ret = get_next_line(fd, &ou)) > 0)
 	{
@@ -141,3 +137,4 @@ int		main()
 //	;
 
 }
+*/
