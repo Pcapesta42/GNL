@@ -1,14 +1,27 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-t_multifd		*create_element(int fd)
+t_multifd		*save(int fd, char **lin, char **tmp, t_multifd **list, int mod)
 {
-	t_multifd	*tmp;
+	int i;
+	t_multifd	*maillon;
 
-	if (!(tmp = ft_memalloc(sizeof(t_multifd))))
-		return (NULL);
-	tmp->fd = fd;
-	return (tmp);
+	i = 0;
+	if (mod == 2)
+	{
+		while (*tmp[i] && *tmp[i] != '\n')
+			i++;
+		*lin = strndup(*tmp, i);
+		if (*tmp[i] && *tmp[i + 1])
+			*list->rest = ft_strsub(*tmp, i + 1, ft_strlen(*tmp) - (i + 1));
+	}
+	else if (mod == 1)
+	{
+		if (!(maillon = ft_memalloc(sizeof(t_multifd))))
+			return (NULL);
+		maillon->fd = fd;
+	}
+	return (maillon);
 }
 
 t_multifd		*get_fd(t_multifd **begin_list, int fd)
@@ -17,7 +30,7 @@ t_multifd		*get_fd(t_multifd **begin_list, int fd)
 
 	if (!(*begin_list))
 	{
-		*begin_list = create_element(fd);
+		*begin_list = save(fd, 0, 0, 0, 1);
 		return (*begin_list);
 	}
 	run_list = *begin_list;
@@ -30,7 +43,7 @@ t_multifd		*get_fd(t_multifd **begin_list, int fd)
 	run_list = *begin_list;
 	while (run_list->next)
 		run_list = run_list->next;
-	run_list->next = create_element(fd);
+	run_list->next = save(fd, 0, 0, 0, 1);
 	return (run_list->next);
 }
 
@@ -67,15 +80,13 @@ int		read_gnl(t_multifd *link_list, char **tmp, int fd)
 		ft_memdel((void**)&link_list->rest);
 	}
 	else if (!(*tmp = ft_memalloc(sizeof(char) * 1)))
-	{
-		ft_memdel((void**)tmp);
 		return (-1);
-	}
 	while (!(ft_strchr(*tmp, '\n')) && (ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
 		buf[ret] = '\0';
 		anti_leak = *tmp;
-		*tmp = ft_strjoin(*tmp, buf);
+		if (!(*tmp = ft_strjoin(*tmp, buf)))
+			return (-1);
 		ft_memdel((void**)&anti_leak);
 		ft_bzero(buf, BUFF_SIZE + 1);
 	}
@@ -88,30 +99,32 @@ int get_next_line(const int fd, char **line)
 	static t_multifd	*begin_list = NULL;
 	t_multifd			*link_list;
 	char				*tmp;
-	int					ret;
+	int					r;
 
 	tmp = NULL;
 	if (!(line) || fd < 0 || !(link_list = get_fd(&begin_list, fd)))
 		return (-1);
-	ret = read_gnl(link_list, &tmp, fd);
-	if (ret == -1 || (ret == 0 && tmp[0] == '\0'))
+	r = read_gnl(link_list, &tmp, fd);
+	if (r == -1 || (r == 0 && tmp[0] == '\0'))
 	{
 		ft_memdel((void**)&tmp);
-		if (ret == 0)
+		if (r == 0)
 			repare_list(&begin_list, link_list);
-		return (ret);
+		return (r);
 	}
-	else if (ret == 0 && !(ft_strchr(tmp, '\n')))
+	else if (r == 0 && !(ft_strchr(tmp, '\n')))
 		*line = ft_strdup(tmp);
 	else
-	{
-		ret = 0;
-		while (tmp[ret] && tmp[ret] != '\n')
-			ret++;
-		*line = strndup(tmp, ret);
-		if (tmp[ret] && tmp[ret + 1])
-			link_list->rest = ft_strsub(tmp, ret + 1, ft_strlen(tmp) - (ret + 1));
+		save(fd, line, &tmp, &link_list, 2);
+/*	{
+		r = 0;
+		while (tmp[r] && tmp[r] != '\n')
+			r++;
+		*line = strndup(tmp, r);
+		if (tmp[r] && tmp[r + 1])
+			link_list->rest = ft_strsub(tmp, r + 1, ft_strlen(tmp) - (r + 1));
 	}
+	*/
 	ft_memdel((void**)&tmp);
 	return (1);
 }
