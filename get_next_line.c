@@ -25,8 +25,7 @@ t_multifd		*get_fd(t_multifd **begin_list, int fd)
 	{
 		if (run_list->fd == fd)
 			return (run_list);
-		else
-			run_list = run_list->next;
+		run_list = run_list->next;
 	}
 	run_list = *begin_list;
 	while (run_list->next)
@@ -40,7 +39,6 @@ void		repare_list(t_multifd **begin_list, t_multifd *link_list)
 	t_multifd	*run_list;
 
 	run_list = *begin_list;
-
 	if (!(run_list))
 		return ;
 	if (run_list == link_list)
