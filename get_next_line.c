@@ -1,28 +1,30 @@
 #include "get_next_line.h"
 #include <stdio.h>
 
-t_multifd		*save(int fd, char ***lin, char **tmp, t_multifd **list, int mod)
+t_multifd		*save(int fd, char ***lin, char *tmp, t_multifd **list)
 {
 	int i;
 	t_multifd	*maillon;
 
 	i = 0;
 	maillon = NULL;
-	if (mod == 1)
-	{
-		while (*tmp[i] && *tmp[i] != '\n')
-			i++;
-		**lin = strndup(*tmp, i);
-		if (*tmp[i] && *tmp[i + 1])
-			(*list)->rest = ft_strsub(*tmp, i + 1, ft_strlen(*tmp) - (i + 1));
-	}
-	else if (mod == 0)
+	if (lin == 0 && tmp == 0 && list == 0)
 	{
 		if (!(maillon = ft_memalloc(sizeof(t_multifd))))
 			return (NULL);
 		maillon->fd = fd;
 	}
-	return (maillon);
+	else
+	{
+		while (tmp[i] && tmp[i] != '\n')
+			i++;
+		**lin = strndup(tmp, i);
+		if (tmp[i] && tmp[i + 1])
+			(*list)->rest = ft_strsub(tmp, i + 1, ft_strlen(tmp) - (i + 1));
+	}
+
+
+return (maillon);
 }
 
 t_multifd		*get_fd(t_multifd **begin_list, int fd)
@@ -31,7 +33,7 @@ t_multifd		*get_fd(t_multifd **begin_list, int fd)
 
 	if (!(*begin_list))
 	{
-		*begin_list = save(fd, 0, 0, 0, 0);
+		*begin_list = save(fd, 0, 0, 0);
 		return (*begin_list);
 	}
 	run_list = *begin_list;
@@ -44,7 +46,7 @@ t_multifd		*get_fd(t_multifd **begin_list, int fd)
 	run_list = *begin_list;
 	while (run_list->next)
 		run_list = run_list->next;
-	run_list->next = save(fd, 0, 0, 0, 0);
+	run_list->next = save(fd, 0, 0, 0);
 	return (run_list->next);
 }
 
@@ -116,7 +118,7 @@ int get_next_line(const int fd, char **line)
 	else if (r == 0 && !(ft_strchr(tmp, '\n')))
 		*line = ft_strdup(tmp);
 	else
-		save(fd, &line, &tmp, &link_list, 1);
+		save(fd, &line, tmp, &link_list);
 /*	{
 		r = 0;
 		while (tmp[r] && tmp[r] != '\n')
@@ -130,8 +132,9 @@ int get_next_line(const int fd, char **line)
 	return (1);
 }
 
+/*
 
-/*int		main()
+int		main()
 {
 	int fd;
 	char *ou;
