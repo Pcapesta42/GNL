@@ -76,10 +76,9 @@ int		read_gnl(t_multifd *link_list, char **tmp, int fd)
 	ret = 1;
 	anti_leak = NULL;
 	if (link_list->rest)
-	{
-		*tmp = ft_strdup(link_list->rest);
-		ft_memdel((void**)&link_list->rest);
-	}
+		if (!(*tmp = ft_strdup(link_list->rest)))
+			return (-1);
+	ft_memdel((void**)&link_list->rest);
 	else if (!(*tmp = ft_memalloc(sizeof(char) * 1)))
 		return (-1);
 	while (!(ft_strchr(*tmp, '\n')) && (ret = read(fd, buf, BUFF_SIZE)) > 0)
