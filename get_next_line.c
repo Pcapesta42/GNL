@@ -18,9 +18,11 @@ t_multifd		*save(int fd, char **lin, char *tmp, t_multifd **list)
 	{
 		while (tmp[i] && tmp[i] != '\n')
 			i++;
-		*lin = strndup(tmp, i);
+		if (!(*lin = strndup(tmp, i)))
+			return (
 		if (tmp[i] && tmp[i + 1])
-			(*list)->rest = ft_strsub(tmp, i + 1, ft_strlen(tmp) - (i + 1));
+			if (!((*list)->rest = ft_strsub(tmp, i + 1, ft_strlen(tmp) - (i + 1))))
+				return (
 	}
 	return (maillon);
 }
@@ -77,11 +79,12 @@ int		read_gnl(t_multifd *link_list, char **tmp, int fd)
 	anti_leak = NULL;
 	if ((link_list->rest) && (!(*tmp = ft_strdup(link_list->rest))))
 	{
-			ft_memdel((void**)&link_list->rest);
-			return (-1);
+		ft_memdel((void**)&(link_list->rest));
+		return (-1);
 	}
 	else if (!(*tmp = ft_memalloc(sizeof(char) * 1)))
 		return (-1);
+	ft_memdel((void**)&(link_list->rest));
 	while (!(ft_strchr(*tmp, '\n')) && (ret = read(fd, buf, BUFF_SIZE)) > 0)
 	{
 		buf[ret] = '\0';
@@ -113,8 +116,8 @@ int get_next_line(const int fd, char **line)
 			repare_list(&begin_list, link_list);
 		return (r);
 	}
-	else if (r == 0 && !(ft_strchr(tmp, '\n')))
-		*line = ft_strdup(tmp);
+	else if (r == 0 && !(ft_strchr(tmp, '\n')) && !(*line = ft_strdup(tmp)))
+			return (-1);
 	else
 		save(-1, line, tmp, &link_list);
 	ft_memdel((void**)&tmp);
